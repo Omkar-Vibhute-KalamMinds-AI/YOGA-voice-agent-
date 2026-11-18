@@ -1,0 +1,25 @@
+langgraph
+langchain
+langchain_openai
+langchain_community
+langsmith
+#client 
+fastmcp 
+python-dotenv 
+langchian 
+langchain
+langchain-openai
+langchain-mcp-adapters 
+
+# RAG 
+python-dotenv
+pandas
+numpy 
+transformers 
+langchain
+torch 
+lancedb 
+fastapi
+uvicorn[standard]
+pydantic
+pyyaml 

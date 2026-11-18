@@ -1,0 +1,10 @@
+[ 2026-11-01 17:09:30,856 ] 25 __main__ - ERROR - rank_bm25 is not installed
+Traceback (most recent call last):
+  File "D:\LG_chatbot\pyfiles\bm25_retriever.py", line 23, in <module>
+    from rank_bm25 import BM25Okapi
+ModuleNotFoundError: No module named 'rank_bm25'
+[ 2026-11-01 17:09:30,857 ] 47 __main__ - ERROR - 
+  Script     : [D:\LG_chatbot\pyfiles\bm25_retriever.py]
+  Line No    : [23]
+  Error Msg  : [Install rank_bm25: pip install rank_bm25]
+

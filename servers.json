@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "expense-manager": {
+      "url": "https://remote-expense-manger-server.fastmcp.app/mcp",
+      "transport": "http",
+      "auth_env": "EXPENSE_MCP_TOKEN"
+    }
+  }
+}

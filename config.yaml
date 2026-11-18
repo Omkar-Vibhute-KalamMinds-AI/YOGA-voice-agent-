@@ -1,0 +1,6 @@
+retriever:
+  min_score_query_variation: 0.75
+
+vectordb:
+  path: D:\LLMOps\lance_db\Attention_paper_db
+  table: transformer_table

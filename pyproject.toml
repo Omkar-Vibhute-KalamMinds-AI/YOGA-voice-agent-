@@ -1,0 +1,32 @@
+[project]
+name = "lg-chatbot"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "gguf>=0.19.0",
+    "langchain[mcp]>=1.4.7",
+    "langchain-community>=0.4.2",
+    "langchain-openai>=1.7.3",
+    "langgraph>=1.2.18",
+    "langsmith>=0.14.12",
+    "numpy>=2.5.4",
+    "sentencepiece>=0.2.2",
+    "torch>=2.14.1",
+    "transformers>=5.21.0",
+    "python-dotenv>=1.2.4",
+    "fastmcp>=4.1.4",
+    "langchian>=0.2.5",
+    "langchain-mcp-adapters>=0.3.1",
+    "langgraph-checkpoint-postgres>=3.2.0",
+    "psycopg[binary,pool]>=3.2.0",
+    "fastapi>=0.136.0",
+    "uvicorn[standard]>=0.46.0",
+    "lancedb>=0.41.0",
+    "rank-bm25>=0.2.2",
+    "pandas>=3.1.0",
+    "pydantic>=2.14.1",
+    "pyyaml>=6.0.3",
+    "python-multipart>=0.0.20",
+]

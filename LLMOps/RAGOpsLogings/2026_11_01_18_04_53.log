@@ -1,0 +1,10 @@
+[ 2026-11-01 18:05:23,687 ] 1025 httpx - INFO - HTTP Request: GET https://huggingface.co/api/models/intfloat/multilingual-e5-large "HTTP/1.1 200 OK"
+[ 2026-11-01 18:05:24,152 ] 1025 httpx - INFO - HTTP Request: HEAD https://huggingface.co/intfloat/multilingual-e5-large/resolve/3d7cfbdacd47fdda877c5cd8a79fbcc4f2a574f3/config_sentence_transformers.json "HTTP/1.1 404 Not Found"
+[ 2026-11-01 18:05:24,153 ] 993 huggingface_hub.utils._http - WARNING - Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[ 2026-11-01 18:05:24,155 ] 1210 sentence_transformers.base.model - INFO - Loading SentenceTransformer model from intfloat/multilingual-e5-large.
+[ 2026-11-01 18:05:24,460 ] 1025 httpx - INFO - HTTP Request: HEAD https://huggingface.co/intfloat/multilingual-e5-large/resolve/3d7cfbdacd47fdda877c5cd8a79fbcc4f2a574f3/config_sentence_transformers.json "HTTP/1.1 404 Not Found"
+[ 2026-11-01 18:05:30,354 ] 1025 httpx - INFO - HTTP Request: GET https://huggingface.co/api/models/intfloat/multilingual-e5-large/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+[ 2026-11-01 18:05:30,604 ] 1025 httpx - INFO - HTTP Request: GET https://huggingface.co/api/models/intfloat/multilingual-e5-large/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+[ 2026-11-01 18:05:36,973 ] 1025 httpx - INFO - HTTP Request: GET https://huggingface.co/api/models/intfloat/multilingual-e5-large "HTTP/1.1 200 OK"
+[ 2026-11-01 18:05:37,588 ] 1025 httpx - INFO - HTTP Request: HEAD https://huggingface.co/intfloat/multilingual-e5-large/resolve/3d7cfbdacd47fdda877c5cd8a79fbcc4f2a574f3/2_Normalize/config.json "HTTP/1.1 404 Not Found"
+[ 2026-11-01 18:05:39,230 ] 110 __main__ - INFO - Generated embeddings with shape (30, 1024) in 1.17s

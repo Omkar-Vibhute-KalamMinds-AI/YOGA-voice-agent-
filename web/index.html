@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YOGA Voice Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560;9..144,680&family=Outfit:wght@360;480;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css?v=sidebar-scroll" />
+</head>
+<body>
+  <div class="app" id="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <span class="mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="36" height="36">
+            <circle cx="24" cy="24" r="22" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M24 36c0-8 6-12 6-18a6 6 0 0 0-12 0c0 6 6 10 6 18z" fill="currentColor"/>
+            <path d="M24 28c-5-2-10-1-13 3 4-1 8 0 13 4 5-4 9-5 13-4-3-4-8-5-13-3z" fill="#090909"/>
+          </svg>
+        </span>
+        <div>
+          <p class="brand-name">YOGA</p>
+          <p class="brand-sub">Voice Agent</p>
+        </div>
+        <button class="sidebar-close" id="sidebar-close" type="button" aria-label="Close sidebar">Close</button>
+      </div>
+
+      <section class="side-block">
+        <h2>New chat</h2>
+        <button class="new-chat" id="new-chat" type="button">New Chat</button>
+      </section>
+
+      <section class="side-block chats-block">
+        <h2>Resume chats</h2>
+        <ul class="chat-list" id="chat-list"></ul>
+      </section>
+
+      <section class="side-block settings-block">
+        <h2>Settings</h2>
+        <label for="user-id">Memory user</label>
+        <input id="user-id" type="text" maxlength="40" autocomplete="name" />
+        <label for="voice-language">Voice language</label>
+        <select id="voice-language">
+          <option value="unknown">Auto detect</option>
+          <option value="en-IN">English</option>
+          <option value="hi-IN">Hindi</option>
+          <option value="mr-IN">Marathi</option>
+          <option value="te-IN">Telugu</option>
+          <option value="kn-IN">Kannada</option>
+          <option value="ml-IN">Malayalam</option>
+          <option value="ta-IN">Tamil</option>
+          <option value="pa-IN">Punjabi</option>
+          <option value="od-IN">Odia</option>
+          <option value="bn-IN">Bengali</option>
+          <option value="gu-IN">Gujarati</option>
+        </select>
+        <label for="voice-speaker">Agent voice</label>
+        <select id="voice-speaker">
+          <optgroup label="Female">
+            <option value="arya">Arya</option>
+            <option value="vani">Vani</option>
+            <option value="dhwani">Dhwani</option>
+            <option value="nirali">Nirali</option>
+            <option value="rohini">Rohini</option>
+            <option value="maya">Maya</option>
+          </optgroup>
+          <optgroup label="Male">
+            <option value="varun">Varun</option>
+            <option value="indra">Indra</option>
+            <option value="krishna">Krishna</option>
+            <option value="vayu">Vayu</option>
+            <option value="kartik">Kartik</option>
+          </optgroup>
+        </select>
+        <label class="toggle" for="voice-out">
+          <input id="voice-out" type="checkbox" checked />
+          Speak replies
+        </label>
+        <button class="save-settings" id="save-settings" type="button">Save settings</button>
+        <p class="saved-note" id="saved-note" hidden>Saved</p>
+      </section>
+    </aside>
+
+    <main class="stage">
+      <header class="topbar">
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open sidebar">Menu</button>
+        <div>
+          <p class="eyebrow">Service, Peace and Joy</p>
+          <h1 id="thread-title">YOGA Voice Agent</h1>
+        </div>
+      </header>
+
+      <section class="transcript" id="transcript" aria-live="polite">
+        <div class="welcome" id="welcome">
+          <p class="welcome-kicker">Orange hour</p>
+          <h2>Speak when you are ready.</h2>
+          <p>I am your voice agent. Pick a language, tap the mic, talk, then Send. The orange cross cancels.</p>
+          <div class="chips">
+            <button type="button" data-prompt="Suggest a 15 minute evening yoga sequence for a stiff lower back.">Evening sequence</button>
+            <button type="button" data-prompt="What is the difference between Hatha and Vinyasa?">Hatha or Vinyasa</button>
+            <button type="button" data-prompt="List my recent expenses.">Recent expenses</button>
+          </div>
+        </div>
+      </section>
+
+      <form class="composer" id="composer">
+        <textarea id="message" rows="1" placeholder="Speak or type…"></textarea>
+        <button type="button" id="mic" aria-label="Start listening">
+          <svg class="icon-mic" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3z"/>
+            <path d="M19 11a7 7 0 0 1-14 0" fill="none"/>
+            <path d="M12 18v3" fill="none"/>
+            <path d="M8 21h8" fill="none"/>
+          </svg>
+          <span class="listen-eq" aria-hidden="true">
+            <i></i><i></i><i></i><i></i>
+          </span>
+        </button>
+        <button type="button" id="voice-cancel" aria-label="Cancel voice message" hidden>
+          <svg class="icon-cancel" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18"/>
+          </svg>
+        </button>
+        <button type="submit" id="send">Send</button>
+      </form>
+    </main>
+  </div>
+  <div class="scrim" id="scrim" hidden></div>
+  <audio id="yoga-speaker" playsinline></audio>
+  <script src="/static/app.js?v=stream-voice"></script>
+</body>
+</html>
