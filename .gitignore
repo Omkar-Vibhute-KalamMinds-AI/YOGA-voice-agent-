@@ -9,8 +9,12 @@ wheels/
 # Virtual environments
 .venv
 
+# Notebooks
+*.ipynb
+
 # Local secrets
 .env
+
 
 # Notebooks
 *.ipynb
