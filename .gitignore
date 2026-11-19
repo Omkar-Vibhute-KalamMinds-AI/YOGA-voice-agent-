@@ -28,4 +28,7 @@ data/
 # Models
 models/
 
+# Local CLI tools
+.tools/
+
 
