@@ -180,4 +180,71 @@ Optional NVIDIA speech fallback
     NVIDIA_STT_MODEL=nvidia/parakeet-ctc-1.1b-asr 
     NVIDIA_STT_LANGUAGE=en-US NVIDIA_TTS_VOICE=Magpie-Multilingual.EN-US.Aria
     NVIDIA_TTS_LANGUAGE=en-US 
-    
+
+---
+
+# Deploy on Koyeb
+
+Koyeb runs the FastAPI process. Nemotron stays on NVIDIA, Saaras and Bulbul stay on Sarvam, and expense tools stay on the remote MCP server.
+
+The image is `Dockerfile` plus `requirements-koyeb.txt`. That install list is the chat and voice stack only. Torch, transformers, LanceDB, and the Tesseract folder are left out so the free instance can build. `.dockerignore` also skips `.venv`, notebooks, and `.env`.
+
+The process listens on `0.0.0.0` and Koyeb's `PORT` (default `8000`). `GET /api/health` returns `{"status":"ok",...}` and is the health check.
+
+## Free instance
+
+| Limit | Value |
+|-------|--------|
+| RAM | 512 MB |
+| CPU | 0.1 vCPU |
+| Disk | 2 GB, ephemeral |
+| Region | Frankfurt or Washington, D.C. |
+| Sleep | After 1 hour with no traffic |
+
+One free web service per organization. It cannot use a volume. Chat threads use in-process `MemorySaver`, so they are empty again after sleep or a new deploy. Leave `POSTGRES_URI` unset on this first deploy. User facts then use `InMemoryStore` and are also cleared when the process exits.
+
+## Create the service
+
+Push the branch first. Koyeb builds the GitHub repo, not files that exist only on your machine.
+
+1. In Koyeb, create a web service from `Omkar-Vibhute-KalamMinds-AI/YOGA-voice-agent-`.
+2. Builder: **Dockerfile**. Instance: **Free**. Region: **Frankfurt**. Port: **8000**.
+3. Health check: `GET /api/health`, with about **90 seconds** of startup grace. The graph is compiled during startup.
+4. Add the secrets below. Do not commit `.env`.
+
+## Environment
+
+Required:
+
+```
+NVIDIA_API_KEY=
+SARVAM_API_KEY=
+```
+
+Expense tools. If this is missing or the MCP server is down, the app still starts and those tools are skipped.
+
+```
+EXPENSE_MCP_TOKEN=
+```
+
+Optional traces:
+
+```
+LANGSMITH_TRACING=true
+LANGSMITH_API_KEY=
+LANGSMITH_PROJECT=
+```
+
+## Check the deploy
+
+Open the `*.koyeb.app` URL. Confirm `/api/health`, one text reply, and one spoken reply. The first open after an hour idle is a cold start. The live voice WebSocket can wake a sleeping service, and that socket may only stay open for a few minutes.
+
+Local image check, from the repo root:
+
+```
+docker build -t yoga-koyeb .
+docker run --rm -p 8000:8000 -e NVIDIA_API_KEY=... -e SARVAM_API_KEY=... yoga-koyeb
+```
+
+If the process is killed for memory, move to an instance with 1 GB of RAM. Do not add the heavy packages back into `requirements-koyeb.txt`.
+
