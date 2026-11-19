@@ -81,6 +81,7 @@ SEED_MEMORIES = (
 
 #---------------------------------System Prompt---------------------------------
 from system_prompt import SYSTEM_PROMPT_TEMPLATE
+from guard import OutputGuard, isolate, prompt_has_secret, screen_input
 from system_prompt import MEMORY_CREATOR_PROMPT
 
 class MemoryWrite(BaseModel):
@@ -215,8 +216,11 @@ def chat_node(state: ChatState, config: RunnableConfig, store: BaseStore) -> Cha
     reply_language = _reply_language_instruction(
         str((config.get("configurable") or {}).get("reply_language") or "")
     )
+    prompt = SYSTEM_PROMPT_TEMPLATE.format(user_memory=user_memory, reply_language=reply_language)
+    if prompt_has_secret(prompt):
+        prompt = SYSTEM_PROMPT_TEMPLATE.format(user_memory="", reply_language=reply_language)
     message: list[BaseMessage] = [
-        SystemMessage(content=SYSTEM_PROMPT_TEMPLATE.format(user_memory=user_memory, reply_language=reply_language)),
+        SystemMessage(content=prompt),
         *state["messages"],
     ]
 
@@ -224,12 +228,18 @@ def chat_node(state: ChatState, config: RunnableConfig, store: BaseStore) -> Cha
         raise ValueError("LLM with tools is not initialized")
 
     writer = get_stream_writer()
+    guard = OutputGuard()
     accumulated: Any = None
     for chunk in llm_with_tools.stream(message):
         accumulated = chunk if accumulated is None else accumulated + chunk
         text = message_text(chunk.content)
         if text:
-            writer({"token": text})
+            safe = guard.feed(text)
+            if safe:
+                writer({"token": safe})
+    tail = guard.finish()
+    if tail:
+        writer({"token": tail})
     if accumulated is None:
         raise ValueError("The model returned no reply")
     raw_content = accumulated.content
@@ -425,11 +435,14 @@ async def invoke_tool(call: dict[str, Any], args: dict[str, Any]) -> ToolMessage
     else:
         result = await asyncio.to_thread(tool.invoke, payload)
     if isinstance(result, ToolMessage):
+        tag = "untrusted_document" if "wiki" in str(call.get("name") or "").lower() else "untrusted_tool_output"
+        result.content = isolate(message_text(result.content), tag)
         return result
     if isinstance(result, tuple):
         result = result[0]
     content = result if isinstance(result, str) else json.dumps(result, default=str)
-    return ToolMessage(content=content, tool_call_id=str(call["id"]), name=str(call["name"]))
+    tag = "untrusted_document" if "wiki" in str(call.get("name") or "").lower() else "untrusted_tool_output"
+    return ToolMessage(content=isolate(content, tag), tool_call_id=str(call["id"]), name=str(call["name"]))
 
 async def execute_tools(state: ChatState) -> dict:
     """Run tools. Expense adds and Wikipedia searches pause until the person answers."""
@@ -580,6 +593,12 @@ async def stream_reply(
     }
     if chatbot is None:
         raise ValueError("Chatbot is not initialized")
+    if resume is None:
+        refusal = screen_input(user_message)
+        if refusal:
+            yield {"type": "text", "text": refusal}
+            yield {"type": "reply_done"}
+            return
     graph_input: Any = (
         Command(resume=resume)
         if resume is not None
