@@ -8,13 +8,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "pyfiles"))
 
 try:
     import lg_chatbot
+    from langchain_core.messages import SystemMessage
 except Exception as exc:  # stack is heavy and not installed in a bare CI runner
     lg_chatbot = None
+    SystemMessage = None
     _IMPORT_ERROR = str(exc)
 else:
     _IMPORT_ERROR = ""
-
-from langchain_core.messages import SystemMessage
 
 import guard
 
