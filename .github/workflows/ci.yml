@@ -15,3 +15,5 @@ jobs:
           python-version: "3.13"
       - name: Syntax-check the application
         run: python -m compileall -q pyfiles
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v

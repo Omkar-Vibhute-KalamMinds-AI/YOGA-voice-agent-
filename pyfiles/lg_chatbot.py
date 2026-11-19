@@ -47,6 +47,7 @@ max_tokens= 1024
 
 #---------------------------------LLM_nemotron---------------------------------
 llm_nemotron = nemotron_llm(max_tokens=4096)
+llm_guard = nemotron_llm(max_tokens=24)
 
 #---------------------------------Tools---------------------------------
 from chatbot_tools import tools as local_tools
@@ -81,7 +82,17 @@ SEED_MEMORIES = (
 
 #---------------------------------System Prompt---------------------------------
 from system_prompt import SYSTEM_PROMPT_TEMPLATE
-from guard import OutputGuard, isolate, prompt_has_secret, screen_input
+from guard import (
+    INPUT_CHECK_SYSTEM,
+    OUTPUT_CHECK_PROMPT,
+    REFUSAL,
+    SAFE_REPLY,
+    OutputGuard,
+    blocks_verdict,
+    isolate,
+    prompt_has_secret,
+    screen_input,
+)
 from system_prompt import MEMORY_CREATOR_PROMPT
 
 class MemoryWrite(BaseModel):
@@ -208,6 +219,47 @@ def _reply_language_instruction(code: str) -> str:
     )
 
 
+def _checker_says_block(messages: list[BaseMessage]) -> bool:
+    """One short call to the guard model. A failure leaves the regex checks in charge."""
+    try:
+        result = llm_guard.invoke(messages)
+    except Exception as exc:
+        print(f"Guard model skipped: {exc}")
+        return False
+    return blocks_verdict(message_text(getattr(result, "content", result)))
+
+
+def llm_input_refusal(text: str) -> str | None:
+    """Separate model call on the user message, before the main model."""
+    if not (text or "").strip():
+        return None
+    assistant_prompt = SYSTEM_PROMPT_TEMPLATE.format(
+        user_memory="",
+        reply_language="the language the user just used",
+    )
+    system = INPUT_CHECK_SYSTEM + "\n\nAssistant instructions you are protecting:\n" + assistant_prompt
+    if _checker_says_block([
+        SystemMessage(content=system),
+        HumanMessage(content=text),
+    ]):
+        return REFUSAL
+    return None
+
+
+def release_reply(text: str) -> str:
+    """Separate model call on the main model's reply, then the local output scan."""
+    spoken = (text or "").strip()
+    if not spoken:
+        return ""
+    if _checker_says_block([
+        HumanMessage(content=OUTPUT_CHECK_PROMPT.format(text=spoken.replace("{", "{{").replace("}", "}}"))),
+    ]):
+        return SAFE_REPLY
+    output = OutputGuard()
+    released = output.feed(spoken) + output.finish()
+    return released or spoken
+
+
 @traceable(name="chat_node", run_type="chain", tags=["chatbot"])
 def chat_node(state: ChatState, config: RunnableConfig, store: BaseStore) -> ChatState:
     """LangGraph node. Sends thread history plus this user's long-term memory."""
@@ -228,24 +280,18 @@ def chat_node(state: ChatState, config: RunnableConfig, store: BaseStore) -> Cha
         raise ValueError("LLM with tools is not initialized")
 
     writer = get_stream_writer()
-    guard = OutputGuard()
     accumulated: Any = None
     for chunk in llm_with_tools.stream(message):
         accumulated = chunk if accumulated is None else accumulated + chunk
-        text = message_text(chunk.content)
-        if text:
-            safe = guard.feed(text)
-            if safe:
-                writer({"token": safe})
-    tail = guard.finish()
-    if tail:
-        writer({"token": tail})
     if accumulated is None:
         raise ValueError("The model returned no reply")
-    raw_content = accumulated.content
+    spoken = release_reply(message_text(accumulated.content))
+    if spoken:
+        writer({"token": spoken})
+    tool_calls = [] if spoken == SAFE_REPLY else list(getattr(accumulated, "tool_calls", []) or [])
     response = AIMessage(
-        content="" if raw_content is None else raw_content,
-        tool_calls=list(getattr(accumulated, "tool_calls", []) or []),
+        content=spoken,
+        tool_calls=tool_calls,
         additional_kwargs=dict(getattr(accumulated, "additional_kwargs", {}) or {}),
         id=getattr(accumulated, "id", None),
     )
@@ -594,7 +640,7 @@ async def stream_reply(
     if chatbot is None:
         raise ValueError("Chatbot is not initialized")
     if resume is None:
-        refusal = screen_input(user_message)
+        refusal = screen_input(user_message) or llm_input_refusal(user_message)
         if refusal:
             yield {"type": "text", "text": refusal}
             yield {"type": "reply_done"}
