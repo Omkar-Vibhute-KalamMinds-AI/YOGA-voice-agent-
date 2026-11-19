@@ -1,0 +1,14 @@
+.venv
+.git
+.github
+**/__pycache__
+**/*.pyc
+.env
+notebooks
+Tesseract
+lance_db
+data
+models
+logs
+tests
+*.md

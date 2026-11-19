@@ -1,0 +1,14 @@
+# Runtime packages for the Koyeb image. Torch, transformers, and LanceDB stay out.
+fastapi>=0.136
+uvicorn[standard]>=0.46
+python-multipart>=0.0.20
+pydantic>=2.14
+python-dotenv>=1.2
+pyyaml>=6
+langgraph>=1.2.18
+langgraph-checkpoint-postgres>=3.2
+psycopg[binary,pool]>=3.2
+langchain-openai>=1.7
+langsmith>=0.14
+httpx2>=2.16
+mcp>=1.0

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -55,12 +56,17 @@ def thread_title(thread_id: str) -> str:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    warm_task = asyncio.create_task(voice.warm_previews("en-IN"))
+    warm_task = (
+        asyncio.create_task(voice.warm_previews("en-IN"))
+        if (os.getenv("SARVAM_API_KEY") or "").strip()
+        else None
+    )
     with lg_chatbot.open_memory_store() as memory_store:
         lg_chatbot.store = memory_store
         await lg_chatbot.setup()
         yield
-    warm_task.cancel()
+    if warm_task is not None:
+        warm_task.cancel()
     lg_chatbot.store = None
     lg_chatbot.chatbot = None
 
@@ -295,4 +301,9 @@ async def spoken_reply(body: SpokenRequest) -> dict[str, str]:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=False) 
+    uvicorn.run(
+        "app:app",
+        host=os.getenv("HOST", "0.0.0.0"),
+        port=int(os.getenv("PORT", "8000")),
+        reload=False,
+    ) 

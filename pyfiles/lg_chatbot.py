@@ -31,19 +31,19 @@ class ChatState(TypedDict):
 dotenv.load_dotenv()
 
 #---------------------------------LLM_gemini_flash---------------------------------
-llm_gemini_flash = load_gemini(
-                    llm_base_url = os.getenv('GEMINI_BASE_URL') or "",
-                    llm_api_key = os.getenv('GEMINI_API_KEY_3') or "", 
-                    llm_model = os.getenv('GEMINI_MODEL') or "", 
-                    max_tokens= 1024
-                    )
-
-#---------------------------------LLM_gemma4_e2b---------------------------------
-llm_gemma4_e2b = load_gemma4_e2b(llm_base_url = os.getenv('Gemma4_BASE_URL') or "",
-llm_api_key = os.getenv('Gemma4_API_KEY') or "", 
-llm_model = os.getenv('Gemma4_MODEL') or "", 
-max_tokens= 1024
+# Built only when a key is present, so a Koyeb deploy can start on NVIDIA alone.
+llm_gemini_flash = (
+    load_gemini(
+        llm_base_url=os.getenv("GEMINI_BASE_URL") or "",
+        llm_api_key=os.getenv("GEMINI_API_KEY_3") or "",
+        llm_model=os.getenv("GEMINI_MODEL") or "",
+        max_tokens=1024,
+    )
+    if (os.getenv("GEMINI_API_KEY_3") or os.getenv("GEMINI_API_KEY"))
+    else None
 )
+
+
 
 #---------------------------------LLM_nemotron---------------------------------
 llm_nemotron = nemotron_llm(max_tokens=4096)
@@ -536,7 +536,12 @@ async def setup() -> None:
     global llm_with_tools, chatbot, tools_by_name
     if store is None:
         raise RuntimeError("Long-term memory store is not open")
-    tools = [*local_tools, *await load_tools()]
+    try:
+        remote_tools = await load_tools()
+    except Exception as exc:
+        print(f"Expense tools skipped: {exc}")
+        remote_tools = []
+    tools = [*local_tools, *remote_tools]
     llm_with_tools = llm_nemotron.bind_tools(tools)
     tools_by_name = {tool.name: tool for tool in tools}
 
