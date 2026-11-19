@@ -36,6 +36,9 @@ class SystemPromptTests(unittest.TestCase):
             "Wikipedia search",
             "Age calculator",
             "Expense tools",
+            "write the solution as a worked example",
+            'Finish with a line "Result:"',
+            'Then a line "Check:"',
         ):
             self.assertIn(heading, SYSTEM_PROMPT_TEMPLATE)
 

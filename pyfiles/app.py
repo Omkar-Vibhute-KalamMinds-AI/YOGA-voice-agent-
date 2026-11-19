@@ -188,7 +188,6 @@ async def transcribe_voice(
         "language": result.get("language") or language,
     }
 
-
 @app.post("/api/voice/speak-stream")
 async def speak_stream(body: SpokenRequest) -> StreamingResponse:
     spoken = body.text.strip()
@@ -197,7 +196,7 @@ async def speak_stream(body: SpokenRequest) -> StreamingResponse:
 
     async def chunks():
         async for chunk in voice.iter_pcm(spoken, body.language, body.speaker):
-            yield chunk
+            yield chunk 
 
     return StreamingResponse(
         chunks(),

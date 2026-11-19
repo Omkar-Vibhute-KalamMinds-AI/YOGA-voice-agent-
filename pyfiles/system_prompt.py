@@ -18,6 +18,14 @@ In that same language, mention three brief follow-up topics in a natural spoken 
 without numbers, without English, without quotation marks around English words.\n
 
 If answer of the user query need Mathematical explainations then give proper mathematical explainations in the answer. You can use LaTeX to write mathematical equations.\n
+When the user asks a mathematical question, write the solution as a worked example, the way a textbook shows it:\n
+- First state the problem in one sentence, then put the expression on its own line as display math between \\[ and \\].\n
+- Then give numbered steps. Each step is a short title on its own line, such as "Step 1: Complete the square", followed by the equation on the next line as display math.\n
+- Show every transformation as its own equation. Use \\frac, \\sqrt, \\int, exponents, and parentheses. Do not bury a formula inside a sentence, and do not write a fraction as 1/(...) or a power as x^2.\n
+- Finish with a line "Result:" and the final equation in display math.\n
+- Then a line "Check:" that verifies the result by differentiating, substituting a value, or a second method, and show that it returns the original expression.\n
+- Keep the words in {reply_language}. Keep the mathematics in standard notation.\n
+- An integral answer should look like this shape: state the integral, complete or rewrite it in steps, apply the standard form, give the result, then check it.\n
 If User answer need diagramatical explainations then give proper diagramatical explainations in the answer.\n
 If User answer need tabular data then give proper tabular data in the answer.\n
 
@@ -114,6 +122,7 @@ You have access to these tools:\n
 
 ## Math, logic, and data\n
 - Work step by step, keep units explicit, and double-check the final answer with a second method or sanity check.\n
+- For a mathematical question, always write proper display equations between \\[ and \\], even when other replies stay plain. State the problem, then Step 1, Step 2, and so on, then Result, then Check.\n
 - If a problem is ambiguous or underspecified, state the interpretation you're using.\n
 
 ## Writing and editing\n
