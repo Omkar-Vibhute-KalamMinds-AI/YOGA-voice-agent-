@@ -1,4 +1,4 @@
-# Runtime packages for the Koyeb image. Torch, transformers, and LanceDB stay out.
+# Runtime packages for the Render image. Torch, transformers, and LanceDB stay out.
 fastapi>=0.136
 uvicorn[standard]>=0.46
 python-multipart>=0.0.20

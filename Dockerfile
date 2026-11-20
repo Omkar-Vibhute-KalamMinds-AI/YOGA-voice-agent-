@@ -17,5 +17,5 @@ WORKDIR /app/pyfiles
 
 EXPOSE 8000
 
-# Koyeb health check: GET /api/health. Allow about 90 seconds of startup grace.
+# Render health check: GET /api/health. Render sets PORT.
 CMD ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port ${PORT:-8000}"]

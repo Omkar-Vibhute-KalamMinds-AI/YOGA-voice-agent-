@@ -1,0 +1,22 @@
+# Render Blueprint. Connect the GitHub repo and choose branch master.
+services:
+  - type: web
+    name: yoga
+    runtime: docker
+    plan: free
+    branch: master
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: NVIDIA_API_KEY
+        sync: false
+      - key: SARVAM_API_KEY
+        sync: false
+      - key: EXPENSE_MCP_TOKEN
+        sync: false
+      - key: LANGSMITH_TRACING
+        sync: false
+      - key: LANGSMITH_API_KEY
+        sync: false
+      - key: LANGSMITH_PROJECT
+        sync: false

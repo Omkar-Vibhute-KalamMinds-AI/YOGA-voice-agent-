@@ -183,34 +183,34 @@ Optional NVIDIA speech fallback
 
 ---
 
-# Deploy on Koyeb
+# Deploy on Render
 
-Koyeb runs the FastAPI process. Nemotron stays on NVIDIA, Saaras and Bulbul stay on Sarvam, and expense tools stay on the remote MCP server.
+Render runs the FastAPI process. Nemotron stays on NVIDIA, Saaras and Bulbul stay on Sarvam, and expense tools stay on the remote MCP server.
 
 The image is `Dockerfile` plus `requirements-koyeb.txt`. That install list is the chat and voice stack only. Torch, transformers, LanceDB, and the Tesseract folder are left out so the free instance can build. `.dockerignore` also skips `.venv`, notebooks, and `.env`.
 
-The process listens on `0.0.0.0` and Koyeb's `PORT` (default `8000`). `GET /api/health` returns `{"status":"ok",...}` and is the health check.
+The process listens on `0.0.0.0` and the `PORT` Render sets (often `10000`). `GET /api/health` returns `{"status":"ok",...}` and is the health check. `render.yaml` is a Blueprint for the same settings.
 
-## Free instance
+## Free web service
 
 | Limit | Value |
 |-------|--------|
 | RAM | 512 MB |
-| CPU | 0.1 vCPU |
-| Disk | 2 GB, ephemeral |
-| Region | Frankfurt or Washington, D.C. |
-| Sleep | After 1 hour with no traffic |
+| Instances | 1 |
+| Disk | Ephemeral. Lost on spin-down and on each deploy |
+| Sleep | After 15 minutes with no HTTP request and no WebSocket message |
+| Wake | About 1 minute. Render shows a loading page while it starts |
 
-One free web service per organization. It cannot use a volume. Chat threads use in-process `MemorySaver`, so they are empty again after sleep or a new deploy. Leave `POSTGRES_URI` unset on this first deploy. User facts then use `InMemoryStore` and are also cleared when the process exits.
+Chat threads use in-process `MemorySaver`, so they are empty again after sleep or a new deploy. Leave `POSTGRES_URI` unset on this first deploy. User facts then use `InMemoryStore` and are also cleared when the process exits. Live speech stays up while the browser is sending WebSocket audio. The first tap after a spin-down waits for the wake.
 
 ## Create the service
 
-Push the branch first. Koyeb builds the GitHub repo, not files that exist only on your machine.
+Push the branch first. Render builds the GitHub repo, not files that exist only on this machine. Use branch **master**.
 
-1. In Koyeb, create a web service from `Omkar-Vibhute-KalamMinds-AI/YOGA-voice-agent-`.
-2. Builder: **Dockerfile**. Instance: **Free**. Region: **Frankfurt**. Port: **8000**.
-3. Health check: `GET /api/health`, with about **90 seconds** of startup grace. The graph is compiled during startup.
-4. Add the secrets below. Do not commit `.env`.
+1. In Render, choose **New** → **Blueprint** and select `Omkar-Vibhute-KalamMinds-AI/YOGA-voice-agent-`.
+2. Render reads `render.yaml`: Docker web service, **Free** plan, health check `/api/health`.
+3. When it asks for the secret values, paste them. Do not commit `.env`.
+4. If you create the service by hand instead of the Blueprint, set runtime **Docker**, branch **master**, and health check path `/api/health`.
 
 ## Environment
 
@@ -237,14 +237,14 @@ LANGSMITH_PROJECT=
 
 ## Check the deploy
 
-Open the `*.koyeb.app` URL. Confirm `/api/health`, one text reply, and one spoken reply. The first open after an hour idle is a cold start. The live voice WebSocket can wake a sleeping service, and that socket may only stay open for a few minutes.
+Open the `*.onrender.com` URL. Confirm `/api/health`, one text reply, and one spoken reply. After 15 minutes idle, the next open is a cold start of about a minute.
 
 Local image check, from the repo root:
 
 ```
-docker build -t yoga-koyeb .
-docker run --rm -p 8000:8000 -e NVIDIA_API_KEY=... -e SARVAM_API_KEY=... yoga-koyeb
+docker build -t yoga .
+docker run --rm -p 8000:8000 -e NVIDIA_API_KEY=... -e SARVAM_API_KEY=... yoga
 ```
 
-If the process is killed for memory, move to an instance with 1 GB of RAM. Do not add the heavy packages back into `requirements-koyeb.txt`.
+If the process is killed for memory, move to a Render instance with at least 1 GB of RAM. Do not add the heavy packages back into `requirements-koyeb.txt`.
 

@@ -31,7 +31,7 @@ class ChatState(TypedDict):
 dotenv.load_dotenv()
 
 #---------------------------------LLM_gemini_flash---------------------------------
-# Built only when a key is present, so a Koyeb deploy can start on NVIDIA alone.
+# Built only when a key is present, so a hosted deploy can start on NVIDIA alone.
 llm_gemini_flash = (
     load_gemini(
         llm_base_url=os.getenv("GEMINI_BASE_URL") or "",
